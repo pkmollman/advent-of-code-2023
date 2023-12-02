@@ -1,6 +1,4 @@
 use std::fs;
-use regex::Regex;
-use once_cell::sync::Lazy;
 
 const INPUT_FILE: &str = "input.txt";
 
@@ -17,7 +15,7 @@ fn main() {
         && game.clone().get_color_max_count(ColorCube::Green) < 14
         && game.clone().get_color_max_count(ColorCube::Blue) < 15
         {
-            total_valid_games += game.Id;
+            total_valid_games += game.id;
         }
     }
     println!("TOTAL VALID GAME ID SUM PART ONE: {}", total_valid_games);
@@ -49,21 +47,21 @@ enum ColorCube {
 
 #[derive(Debug, Clone, Copy)]
 struct ColorCubeSet {
-    Count: u32,
-    Color: ColorCube,
+    count: u32,
+    color: ColorCube,
 }
 
 #[derive(Debug, Clone)]
 struct GameRound {
-    CubeSets: Vec<ColorCubeSet>
+    cube_sets: Vec<ColorCubeSet>
 }
 
 impl GameRound {
     fn get_color_count(self, color: ColorCube) -> u32 {
         let mut color_count: u32 = 0;
-        for color_set in self.CubeSets {
-            if color == color_set.Color {
-                color_count += color_set.Count
+        for color_set in self.cube_sets {
+            if color == color_set.color {
+                color_count += color_set.count
             }
         }
         return color_count
@@ -71,14 +69,14 @@ impl GameRound {
 
     fn from_string(round_string: String) -> GameRound {
         let mut round = GameRound{
-            CubeSets: vec![],
+            cube_sets: vec![],
         };
         for cube_set in round_string.split(",") {
             let set_split: Vec<&str> = cube_set.trim().split(" ").collect();
-            round.CubeSets.push(
+            round.cube_sets.push(
                 ColorCubeSet {
-                    Count: set_split[0].parse::<u32>().unwrap(),
-                    Color: match  set_split[1] {
+                    count: set_split[0].parse::<u32>().unwrap(),
+                    color: match  set_split[1] {
                         "red"   => ColorCube::Red,
                         "green" => ColorCube::Green,
                         "blue"  => ColorCube::Blue,
@@ -93,14 +91,14 @@ impl GameRound {
 
 #[derive(Debug, Clone)]
 struct Game {
-    Id: u32,
-    Rounds: Vec<GameRound>,
+    id: u32,
+    rounds: Vec<GameRound>,
 }
 
 impl Game {
     fn get_color_max_count(self, color: ColorCube) -> u32 {
         let mut color_count: u32 = 0;
-        for round in self.Rounds {
+        for round in self.rounds {
             let round_color_count = round.get_color_count(color);
             if round_color_count > color_count {
                 color_count = round_color_count;
@@ -112,8 +110,8 @@ impl Game {
     fn from_string(game_string: String) -> Game {
         let mut rounds: Vec<GameRound> = vec![];
         let game_id = game_string.clone()
-            .split(":").collect::<Vec<&str>>()[0].to_string()
-            .split(" ").collect::<Vec<&str>>()[1].to_string()
+            .split(":").collect::<Vec<_>>()[0]
+            .split(" ").collect::<Vec<_>>()[1]
             .parse::<u32>().unwrap();
         for round_split in game_string.split(":").collect::<Vec<&str>>()[1].split(";") {
             rounds.push(
@@ -121,8 +119,8 @@ impl Game {
             )
         }
         return Game{
-            Id: game_id,
-            Rounds: rounds,
+            id: game_id,
+            rounds: rounds,
         }
     }
 }
