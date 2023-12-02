@@ -79,16 +79,22 @@ impl GameRound {
                 ColorCubeSet {
                     Count: set_split[0].parse::<u32>().unwrap(),
                     Color: match  set_split[1] {
-                        "red"   => {ColorCube::Red}
-                        "green" => {ColorCube::Green}
-                        "blue"  => {ColorCube::Blue}
-                        _       => {ColorCube::None}
+                        "red"   => ColorCube::Red,
+                        "green" => ColorCube::Green,
+                        "blue"  => ColorCube::Blue,
+                        _       => ColorCube::None,
                     }
                 }
             )
         }
         return round
     }
+}
+
+#[derive(Debug, Clone)]
+struct Game {
+    Id: u32,
+    Rounds: Vec<GameRound>,
 }
 
 impl Game {
@@ -120,10 +126,3 @@ impl Game {
         }
     }
 }
-
-#[derive(Debug, Clone)]
-struct Game {
-    Id: u32,
-    Rounds: Vec<GameRound>,
-}
-
