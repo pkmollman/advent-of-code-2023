@@ -1,6 +1,7 @@
 use core::num;
 use std::fs;
 use regex::Regex;
+use once_cell::sync::Lazy;
 
 const INPUT_FILE: &str = "input.txt";
 
@@ -38,8 +39,6 @@ impl IntPair {
     }
 }
 
-// me regex idea ^(one|two|three|four|five|six|seven|eight|nine)
-
 fn get_first_and_last_digit_pair_part_one(input_string: String) -> IntPair {
     let mut new_pair = IntPair{
         i1: 0,
@@ -63,8 +62,8 @@ fn get_first_and_last_digit_pair_part_one(input_string: String) -> IntPair {
 }
 
 fn i_from_alpha(s: String) -> Option<u32> {
-    let num_regex = Regex::new(r"^(one|two|three|four|five|six|seven|eight|nine)").unwrap();
-    match num_regex.captures(&s) {
+    static NUM_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"^(one|two|three|four|five|six|seven|eight|nine)").unwrap());
+    match NUM_REGEX.captures(&s) {
         Some(caps) => {
             Some(
                 match &caps[0] {
