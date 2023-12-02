@@ -12,7 +12,7 @@ fn main() {
         games.push(new_game)
     }
     let mut total_valid_games = 0;
-    for game in games {
+    for game in games.clone() {
         if game.clone().get_color_max_count(ColorCube::Red) < 13
         && game.clone().get_color_max_count(ColorCube::Green) < 14
         && game.clone().get_color_max_count(ColorCube::Blue) < 15
@@ -20,7 +20,15 @@ fn main() {
             total_valid_games += game.Id;
         }
     }
-    println!("TOTAL VALID GAME ID SUM PART ONE: {}", total_valid_games)
+    println!("TOTAL VALID GAME ID SUM PART ONE: {}", total_valid_games);
+    let mut total_power_games = 0;
+    for game in games {
+        total_power_games +=
+            game.clone().get_color_max_count(ColorCube::Red) *
+            game.clone().get_color_max_count(ColorCube::Green) *
+            game.clone().get_color_max_count(ColorCube::Blue);
+    }
+    println!("TOTAL GAME POWER SUM PART TWO: {}",  total_power_games);
 }
 
 fn file_path_to_lines(file_path: String) -> Vec<String> {
