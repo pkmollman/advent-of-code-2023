@@ -1,4 +1,3 @@
-use core::num;
 use std::fs;
 use regex::Regex;
 use once_cell::sync::Lazy;
@@ -46,7 +45,7 @@ fn get_first_and_last_digit_pair_part_one(input_string: String) -> IntPair {
     };
     let mut first_found = false;
 
-    for (i, c) in input_string.chars().enumerate(){
+    for c in input_string.chars(){
         if c.is_numeric(){
             if !first_found {
                 new_pair.i1 = c.to_digit(10).unwrap();
