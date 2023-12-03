@@ -4,6 +4,7 @@ use regex::Regex;
 use once_cell::sync::Lazy;
 
 static SYMBOL_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"([^0-9\.])").unwrap());
+static GEAR_SYMBOL_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"(\*)").unwrap());
 static PART_NUMBER_REGEX: Lazy<Regex> = Lazy::new(|| Regex::new(r"^(\d+)").unwrap());
 
 fn file_path_to_lines(file_path: String) -> Vec<String> {
@@ -113,6 +114,42 @@ impl SpecGrid {
         }
         return symbol_found
     }
+
+    fn is_part_possible_gear(self, part: PartNumber) -> (bool, Vec<Vec2>) {
+        let mut gear_symbol_found = false;
+        let mut gear_positions: Vec<Vec2> = vec![];
+        let check_vecs = vec![
+            Vec2{x:-1,y:-1},
+            Vec2{x:-1,y:0},
+            Vec2{x:-1,y:1},
+            Vec2{x:0,y:-1},
+            Vec2{x:0,y:1},
+            Vec2{x:1,y:-1},
+            Vec2{x:1,y:0},
+            Vec2{x:1,y:1},
+        ];
+        for x in part.start_pos.x..(part.start_pos.x + part.len as i32 ) {
+            let current_origin = Vec2{x: x, y: part.start_pos.y};
+            for check_offset in check_vecs.clone() {
+                let check_point = current_origin.clone() + check_offset;
+                if !check_point.clone().off_grid() && check_point.clone().x < self.clone().size.x && check_point.clone().y < self.clone().size.y{
+                    // println!("cur check point: {:?} {:?}", check_point.x as usize, check_point.y as usize);
+                    // println!("char: {:?}", self.grid.clone()[check_point.y as usize][check_point.x as usize].to_string().as_str());
+                    if GEAR_SYMBOL_REGEX.is_match(self.grid.clone()[check_point.y as usize][check_point.x as usize].to_string().as_str()) {
+                        gear_symbol_found = true;
+                        gear_positions.push(check_point);
+                    }
+                }
+            }
+        }
+        return (gear_symbol_found, gear_positions)
+    }
+}
+
+#[derive(Clone, Debug)]
+struct Gear {
+    gear_position: Vec2,
+    parts: Vec<PartNumber>,
 }
 
 fn main(){
@@ -129,10 +166,48 @@ fn main(){
     }
     let parts = main_grid.clone().get_part_numbers();
     let mut part_total = 0;
-    for part in parts{
+    for part in parts.clone(){
         if main_grid.clone().is_part_valid(part.clone()) {
             part_total += part.number;
         }
     }
     println!("TOTAL: {}", part_total);
+    
+    let mut gears: Vec<Gear> = vec![];
+    for part in parts.clone(){
+        let (possible_gear, gear_positions) = main_grid.clone().is_part_possible_gear(part.clone());
+        if possible_gear {
+            for gear_pos in gear_positions.clone(){
+                let mut gear_exists = false;
+                for i in 0..gears.len() {
+                    if gears[i].gear_position.x == gear_pos.x && gears[i].gear_position.y == gear_pos.y {
+                        gear_exists = true;
+                        let mut part_exits = false;
+                        for sub_part in gears[i].parts.iter() {
+                            if part.number == sub_part.number {
+                                part_exits = true;
+                            }
+                        }
+                        if !part_exits {
+                            gears[i].parts.push(part.clone());
+                        }
+                    }
+                }
+                if !gear_exists {
+                    gears.push(Gear { gear_position: gear_pos, parts: vec![part.clone()] })
+                }
+            }
+        }
+    }
+
+    let mut gear_total = 0;
+    for gear in gears {
+        if gear.parts.len() == 2 {
+            gear_total += gear.parts[0].number * gear.parts[1].number;
+        }
+    }
+    println!("GEAR TOTAL: {}", gear_total);
+
+
+
 }
